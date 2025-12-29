@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://user:password@localhost:5432/securemind?schema=public"
+}
+
+enum Role {
+  USER
+  ADMIN
+  GUEST
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hashed password
+  name      String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  labProgress LabProgress[]
+}
+
+model LabProgress {
+  id        String   @id @default(uuid())
+  userId    String
+  labId     String   // e.g., "password-security"
+  completed Boolean  @default(false)
+  score     Int      @default(0)
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, labId])
+}
